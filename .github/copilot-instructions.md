@@ -14,6 +14,7 @@
 - **Development Environment**: Dev Containers
 - **Containerization**: Docker
 - **Testing**: pytest (unit tests and integration tests)
+- **Package manager**: uv
 
 ## Project Architecture
 

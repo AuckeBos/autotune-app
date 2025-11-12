@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  # Development container with autotune-app and dependencies
+  autotune-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final
+    container_name: autotune-dev
+    image: autotune-app:dev
+    volumes:
+      # Mount to persist pip cache
+      - pip-cache:/root/.cache/pip
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+    environment:
+      # Prefect configuration
+      - PREFECT_API_URL=http://prefect-server:4200/api
+      - PREFECT_UI_URL=http://localhost:12001
+      - PREFECT_HOME=/app/.prefect
+      # Logging configuration
+      - LOG_LEVEL=DEBUG
+      # Python settings
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    env_file:
+      - .env.local
+    ports:
+      # Streamlit UI (when implemented)
+      - "8501:8501"
+      # Prefect UI proxy (optional)
+      - "12001:4200"
+    depends_on:
+      - prefect-server
+    networks:
+      - autotune-network
+    # stdin_open: true
+    tty: true
+    working_dir: /app
+
+  # Prefect server for workflow orchestration
+  prefect-server:
+    image: prefecthq/prefect:3-python3.14
+    container_name: prefect-server
+    command: prefect server start
+    environment:
+      # Use SQLite for development
+      - PREFECT_API_DATABASE_CONNECTION_URL=sqlite+aiosqlite:////data/prefect.db
+      - PREFECT_HOME=/data/prefect
+    volumes:
+      - prefect-data:/data
+    ports:
+      - "4200:4200"
+    networks:
+      - autotune-network
+    # healthcheck:
+    #   test: ["CMD", "curl", "--fail", "http://localhost:4200/api/health"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 30s
+
+volumes:
+  prefect-data:
+    driver: local
+  pip-cache:
+    driver: local
+
+networks:
+  autotune-network:
+    driver: bridge

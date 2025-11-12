@@ -1,0 +1,92 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Dev containers
+.devcontainer/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.history/
+.vscode-server/
+
+# Documentation
+docs/build/
+site/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build and runtime
+*.log
+dist/
+build/
+.next/
+out/
+
+# Node (used by autotune build)
+node_modules/
+npm-debug.log
+
+# Docker
+Dockerfile.dev
+docker-compose.override.yml
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
+
+# Project-specific
+.prefect/
+prefect.db
