@@ -87,23 +87,50 @@ Open your browser and navigate to `http://localhost:4200` to access the Prefect 
 ```
 autotune-app/
 ├── .devcontainer/              # Dev container configuration
-│   └── devcontainer.json       # VS Code dev container setup
+├── .github/
+│   ├── copilot-instructions.md # GitHub Copilot guidelines
+│   └── instructions/           # Detailed development guidelines
 ├── src/
-│   └── autotune_app/           # Main application package
-│       ├── flows/              # Prefect flows
-│       ├── tasks/              # Prefect tasks
-│       ├── services/           # Business logic (API clients, etc.)
-│       ├── models/             # Data models
-│       └── utils/              # Utility functions
+│   └── app/                    # Main application package
+│       ├── clients/            # Low-level API clients
+│       │   ├── nightscout_client.py  # Nightscout API wrapper
+│       │   └── autotune_client.py    # Autotune CLI wrapper
+│       ├── models/             # Pydantic data models
+│       │   ├── nightscout.py   # Nightscout data structures
+│       │   └── autotune.py     # Autotune data structures
+│       └── services/           # High-level service layer
+│           ├── nightscout_service.py # Nightscout service
+│           └── autotune_service.py   # Autotune service
 ├── tests/
-│   ├── unit/                   # Unit tests
-│   └── integration/            # Integration tests
+│   └── unit/                   # Unit tests
+│       ├── test_nightscout_client.py
+│       ├── test_autotune_client.py
+│       ├── test_nightscout_service.py
+│       └── test_autotune_service.py
+├── docs/
+│   └── IMPLEMENTATION.md       # Implementation documentation
 ├── docker/                     # Docker configurations
-├── Dockerfile                  # Development image
-├── docker-compose.yml          # Multi-container setup
+│   ├── Dockerfile              # Development image
+│   └── docker-compose.yml      # Multi-container setup
 ├── pyproject.toml              # Python project config
 └── README.md                   # This file
 ```
+
+## Implementation Status
+
+✅ **Completed**:
+- Nightscout API client with profile, entries, and treatments endpoints
+- Autotune CLI wrapper for running autotune analysis
+- Pydantic models for type-safe data validation
+- Service layer with user-friendly interfaces
+- Comprehensive unit tests for all components
+
+🚧 **In Progress**:
+- Prefect flows and tasks (coming next)
+- Streamlit web interface (planned)
+- Integration tests (planned)
+
+See [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for detailed implementation documentation.
 
 ## Development Workflow
 
@@ -127,26 +154,38 @@ pytest tests/unit/test_services.py
 pytest -k "test_nightscout"
 ```
 
-### Creating Prefect Flows
+### Using the Clients and Services
 
-See [Prefect Guidelines](.github/instructions/prefect.instructions.md) for detailed flow development guidelines.
+The application provides two layers of interaction:
 
-Example task:
+1. **Clients** (low-level): Direct API/CLI interaction
+2. **Services** (high-level): Validated, user-friendly wrappers
+
+Example using services:
 ```python
-from prefect import task, get_run_logger
+from app.services.nightscout_service import NightscoutService
+from app.services.autotune_service import AutotuneService
 
-@task(
-    name="load-data",
-    retries=3,
-    retry_delay_seconds=60
+# Load data from Nightscout
+ns_service = NightscoutService("https://mysite.herokuapp.com", "api-secret")
+profile_store = ns_service.get_profile_store("Default")
+historical_data = ns_service.get_historical_data(days=7)
+
+# Run autotune analysis
+at_service = AutotuneService()
+recommendations = at_service.run_analysis(
+    profile_store, 
+    historical_data, 
+    "Default", 
+    days=7
 )
-def load_nightscout_data(url: str, api_secret: str) -> dict:
-    """Load Nightscout data."""
-    logger = get_run_logger()
-    logger.info(f"Loading data from {url}")
-    # Implementation here
-    return data
+
+# Apply recommendations and sync back
+updated_profile = at_service.apply_recommendations(profile_store, recommendations)
+ns_service.sync_profile(updated_profile, "Default")
 ```
+
+See [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for more examples and detailed API documentation.
 
 ## Configuration
 
