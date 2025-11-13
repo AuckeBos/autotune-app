@@ -1,6 +1,6 @@
 {
     "name": "Autotune App Dev",
-    "dockerComposeFile": "../docker-compose.yml",
+    "dockerComposeFile": "../docker/docker-compose.yml",
     "service": "autotune-app",
     "workspaceFolder": "/app",
     "customizations": {
@@ -62,9 +62,10 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {}
     },
-    "postCreateCommand": "bash -c 'echo \"Dev container initialized successfully!\" && python --version && uv --version'",
-    "postStartCommand": "bash -c 'echo \"Starting Prefect agent...\" || true'", // 
+    "postCreateCommand": "uv sync",
     "mounts": [
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/appuser/.gitconfig,type=bind,consistency=cached"
+        "source=${localEnv:USERPROFILE}\\.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
+        // Temp share SSH folder
+        "type=bind,source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,readonly,consistency=cached"
     ]
 }

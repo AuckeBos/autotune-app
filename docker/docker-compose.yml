@@ -1,24 +1,17 @@
-version: "3.8"
-
 services:
   # Development container with autotune-app and dependencies
   autotune-app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: final
     container_name: autotune-dev
     image: autotune-app:dev
     volumes:
       # Mount to persist pip cache
       - pip-cache:/root/.cache/pip
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /app
-          ignore:
-            - .venv/
+      - venv:/app/.venv
+      - ../:/app:cached
     environment:
       # Prefect configuration
       - PREFECT_API_URL=http://prefect-server:4200/api
@@ -30,7 +23,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     env_file:
-      - .env.local
+      - ../.env.local
     ports:
       # Streamlit UI (when implemented)
       - "8501:8501"
@@ -70,6 +63,8 @@ volumes:
   prefect-data:
     driver: local
   pip-cache:
+    driver: local
+  venv:
     driver: local
 
 networks:

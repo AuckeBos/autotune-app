@@ -22,18 +22,13 @@ FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS final
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    git \
-    jq \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl git jq ssh && rm -rf /var/lib/apt/lists/*
 
 # Copy project files
-COPY . /app
+# COPY . /app
 
 # Install Python dependencies using uv
-RUN uv sync
+# RUN uv sync
 
 # Add virtual environment to PATH
 ENV PATH="/app/.venv/bin:$PATH"
@@ -42,16 +37,19 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY --from=autotune-builder /tmp/build /opt/autotune
 ENV PATH="/opt/autotune/bin:$PATH"
 
+# TEMP DISABLE DUE TO VOLUME PERMISSION ERROR
 # Create non-root user with fallback
-RUN apt-get update && apt-get install -y --no-install-recommends passwd \
-    && useradd -m -u 1000 appuser || echo "appuser:x:1000:1000:appuser:/home/appuser:/bin/bash" >> /etc/passwd \
-    && chown -R appuser:appuser /app \
-    && cat /etc/passwd | grep appuser
+# RUN apt-get update && apt-get install -y --no-install-recommends passwd \
+#     && useradd -m -u 1000 appuser || echo "appuser:x:1000:1000:appuser:/home/appuser:/bin/bash" >> /etc/passwd \
+#     && chown -R appuser:appuser /app \
+#     && cat /etc/passwd | grep appuser
+# USER appuser
 
 # Set working directory for app user
 WORKDIR /app
 
-USER appuser
+
+RUN git config --global core.autocrlf true
 
 # Default command: tail dev null
 CMD ["tail", "-f", "/dev/null"]
